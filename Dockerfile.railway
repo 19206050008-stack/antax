@@ -20,16 +20,16 @@ COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 # Copy source
 COPY . .
 
+# Setup storage (must exist before composer install triggers package:discover)
+RUN mkdir -p storage/framework/{cache,sessions,views} \
+    storage/logs bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
 # Install PHP deps
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 # Install Node deps + build frontend
 RUN npm ci && npm run build && rm -rf node_modules
-
-# Setup storage
-RUN mkdir -p storage/framework/{cache,sessions,views} \
-    storage/logs bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
 
 # Setup SQLite DB
 RUN touch database/database.sqlite
