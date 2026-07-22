@@ -49,4 +49,4 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/antax.conf
 
 EXPOSE 80
 
-CMD ["/bin/bash", "-c", "php artisan package:discover --ansi && php artisan migrate --force && php artisan storage:link && php artisan config:cache && php artisan route:cache && envsubst '$PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/sites-available/default && supervisord -c /etc/supervisor/supervisord.conf"]
+CMD ["/bin/bash", "-c", "php artisan package:discover --ansi && php artisan migrate --force && php artisan storage:link && php artisan config:cache && php artisan route:cache && envsubst '$PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/sites-available/default && php artisan about 2>&1 || true && supervisord -c /etc/supervisor/supervisord.conf"]
