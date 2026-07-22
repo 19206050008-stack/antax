@@ -42,16 +42,22 @@ RUN touch database/database.sqlite
 RUN chmod -R 777 database storage bootstrap/cache
 
 # Nginx config
-RUN echo 'server { \
-    listen 80; \
-    root /var/www/html/public; \
-    index index.php; \
-    location / { try_files $uri $uri/ /index.php?$query_string; } \
-    location ~ \.php$ { fastcgi_pass 127.0.0.1:9000; fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name; include fastcgi_params; } \
-}' > /etc/nginx/sites-available/default
+RUN printf 'server {
+    listen 80;
+    root /var/www/html/public;
+    index index.php;
+    location / { try_files $uri $uri/ /index.php?$query_string; }
+    location ~ \.php$ {
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+' > /etc/nginx/sites-available/default
 
 # Supervisor config
-RUN echo '[supervisord]\nnodaemon=true\n\n[program:php-fpm]\ncommand=php-fpm\nautostart=true\nautorestart=true\n\n[program:nginx]\ncommand=nginx -g "daemon off;"\nautostart=true\nautorestart=true\n\n[program:queue]\ncommand=php /var/www/html/artisan queue:work --sleep=3 --tries=3 --timeout=60\nautostart=true\nautorestart=true\n' > /etc/supervisor/conf.d/antax.conf
+RUN printf '[supervisord]\nnodaemon=true\nuser=root\n\n[program:php-fpm]\ncommand=php-fpm\nautostart=true\nautorestart=true\nstdout_logfile=/dev/stdout\nstdout_logfile_maxbytes=0\nstderr_logfile=/dev/stderr\nstderr_logfile_maxbytes=0\n\n[program:nginx]\ncommand=nginx -g "daemon off;"\nautostart=true\nautorestart=true\nstdout_logfile=/dev/stdout\nstdout_logfile_maxbytes=0\nstderr_logfile=/dev/stderr\nstderr_logfile_maxbytes=0\n\n[program:queue]\ncommand=php /var/www/html/artisan queue:work --sleep=3 --tries=3 --timeout=60\nautostart=true\nautorestart=true\nstdout_logfile=/dev/stdout\nstdout_logfile_maxbytes=0\nstderr_logfile=/dev/stderr\nstderr_logfile_maxbytes=0\n' > /etc/supervisor/conf.d/antax.conf
 
 EXPOSE 80
 
