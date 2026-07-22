@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))->withRouting(
         channels: __DIR__.'/../routes/channels.php',
         health: '/up',
         using: function() {
+            Route::get('/up', fn() => response('', 200));
             Route::prefix(config('app.admin_prefix'))->middleware('admin-area')->group(base_path('routes/admin/web.php'));
             Route::middleware(['web', 'restrict.ip', 'device.identifier', 'terminator'])->group(base_path('routes/downloads.php'));
             Route::middleware(['web', 'restrict.ip', 'device.identifier', 'terminator'])->group(base_path('routes/social.php'));
