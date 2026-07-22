@@ -26,15 +26,15 @@ RUN mkdir -p storage/framework/{cache,sessions,views} \
     && chmod -R 777 storage bootstrap/cache \
     && chown -R root:root storage bootstrap/cache
 
-# Install PHP deps
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+# Install PHP deps (bypass post-autoload-dump scripts to prevent permission issues during build)
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
 # Install Node deps + build frontend
 RUN npm ci && npm run build && rm -rf node_modules
 
 # Setup SQLite DB
 RUN touch database/database.sqlite
-RUN chmod 777 database database/database.sqlite
+RUN chmod -R 777 database storage bootstrap/cache
 
 # Nginx config
 RUN echo 'server { \
@@ -50,4 +50,4 @@ RUN echo '[supervisord]\nnodaemon=true\n\n[program:php-fpm]\ncommand=php-fpm\nau
 
 EXPOSE 80
 
-CMD ["/bin/bash", "-c", "php artisan migrate --force && php artisan storage:link && php artisan config:cache && php artisan route:cache && supervisord -c /etc/supervisor/supervisord.conf"]
+CMD ["/bin/bash", "-c", "php artisan package:discover --ansi && php artisan migrate --force && php artisan storage:link && php artisan config:cache && php artisan route:cache && supervisord -c /etc/supervisor/supervisord.conf"]
