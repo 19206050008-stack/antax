@@ -23,7 +23,8 @@ COPY . .
 # Setup storage & cache directories first for composer scripts
 RUN mkdir -p storage/framework/{cache,sessions,views} \
     storage/logs bootstrap/cache \
-    && chmod -R 777 storage bootstrap/cache
+    && chmod -R 777 storage bootstrap/cache \
+    && chown -R root:root storage bootstrap/cache
 
 # Install PHP deps
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
