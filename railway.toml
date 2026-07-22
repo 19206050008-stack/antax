@@ -2,7 +2,7 @@
 dockerfile = "Dockerfile.railway"
 
 [deploy]
-healthcheckPath = "/api/system/health"
+healthcheckPath = "/up"
 healthcheckTimeout = 60
 
 [[services]]
