@@ -20,13 +20,12 @@ COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 # Copy source
 COPY . .
 
-# Setup storage & cache directories first for composer scripts
-RUN mkdir -p storage/framework/{cache,sessions,views} \
-    storage/logs bootstrap/cache \
-    && chmod -R 777 storage bootstrap/cache \
-    && chown -R root:root storage bootstrap/cache
+# Buat folder dan set permission secara eksplisit
+RUN mkdir -p bootstrap/cache storage/framework/{cache,sessions,views} storage/logs \
+    && chmod -R 777 bootstrap/cache storage \
+    && chown -R root:root bootstrap/cache storage
 
-# Install PHP deps (bypass post-autoload-dump scripts to prevent permission issues during build)
+# Install PHP deps
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
 # Install Node deps + build frontend
