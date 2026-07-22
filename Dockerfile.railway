@@ -1,0 +1,51 @@
+FROM php:8.3-fpm-bookworm
+
+WORKDIR /var/www/html
+
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl unzip zip nginx supervisor \
+    libicu-dev libzip-dev \
+    libpng-dev libjpeg62-turbo-dev libwebp-dev libfreetype6-dev \
+    libonig-dev libxml2-dev libsqlite3-dev \
+    nodejs npm \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j"$(nproc)" \
+       gd intl mbstring pdo_sqlite pdo_mysql bcmath pcntl zip opcache \
+    && rm -rf /var/lib/apt/lists/*
+
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
+# Copy source
+COPY . .
+
+# Install PHP deps
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+# Install Node deps + build frontend
+RUN npm ci && npm run build && rm -rf node_modules
+
+# Setup storage
+RUN mkdir -p storage/framework/{cache,sessions,views} \
+    storage/logs bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+# Setup SQLite DB
+RUN touch database/database.sqlite
+
+# Nginx config
+RUN echo 'server { \
+    listen 80; \
+    root /var/www/html/public; \
+    index index.php; \
+    location / { try_files $uri $uri/ /index.php?$query_string; } \
+    location ~ \.php$ { fastcgi_pass 127.0.0.1:9000; fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name; include fastcgi_params; } \
+}' > /etc/nginx/sites-available/default
+
+# Supervisor config
+RUN echo '[supervisord]\nnodaemon=true\n\n[program:php-fpm]\ncommand=php-fpm\nautostart=true\nautorestart=true\n\n[program:nginx]\ncommand=nginx -g "daemon off;"\nautostart=true\nautorestart=true\n\n[program:queue]\ncommand=php /var/www/html/artisan queue:work --sleep=3 --tries=3 --timeout=60\nautostart=true\nautorestart=true\n' > /etc/supervisor/conf.d/antax.conf
+
+EXPOSE 80
+
+CMD ["/bin/bash", "-c", "php artisan migrate --force && php artisan storage:link && php artisan config:cache && php artisan route:cache && supervisord -c /etc/supervisor/supervisord.conf"]
