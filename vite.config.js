@@ -52,7 +52,9 @@ export default defineConfig({
             buildStart() {
                 // Generate a random build number and save it to the storage/frontend/build.num file
                 // This is used to prevent caching of the build none packed with vite like dark theme css file.
-
+                if (!fs.existsSync('./storage/frontend')) {
+                    fs.mkdirSync('./storage/frontend', { recursive: true });
+                }
                 fs.writeFileSync('./storage/frontend/build.num', Math.floor(Math.random() * 1000000).toString());
             }
         }
