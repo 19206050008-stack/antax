@@ -10,11 +10,11 @@ import outsideClickDirective from '@/kernel/vue/directives/click.outside.js';
 import Router from '@D/router/index.js';
 import LanguageMessages from '@/lang/index.js';
 
-import ANTAXDesktop from '@D/bootstrap/boot/ANTAXDesktop.vue';
+import ColibriPlusDesktop from '@D/bootstrap/boot/ColibriPlusDesktop.vue';
 import PrimeVue from 'primevue/config';
 import globalProperties from '@/kernel/vue/plugins/global.properties.js';
 
-const Application = createApp(ANTAXDesktop);
+const Application = createApp(ColibriPlusDesktop);
 
 async function initializeI18n() {
     const messages = await LanguageMessages.messages();

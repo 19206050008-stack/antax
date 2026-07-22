@@ -9,14 +9,14 @@ import longPressDirective from '@/kernel/vue/directives/long.press.js';
 
 import { postDeleteListener } from '@/kernel/vue/plugins/pinia/post/delete-listener.js';
 
-import ANTAXMobile from '@M/bootstrap/boot/ANTAXMobile.vue';
+import ColibriPlusMobile from '@M/bootstrap/boot/ColibriPlusMobile.vue';
 import Router from '@M/router/index.js';
 
 import globalProperties from '@/kernel/vue/plugins/global.properties.js';
 import globalHelpers from '@M/core/global/global.helpers.js';
 import LanguageMessages from '@/lang/index.js';
 
-const Application = createApp(ANTAXMobile);
+const Application = createApp(ColibriPlusMobile);
 
 Application.directive('outside-click', outsideClickDirective);
 Application.directive('longpress', longPressDirective);
