@@ -20,19 +20,20 @@ COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 # Copy source
 COPY . .
 
+# Setup storage & cache directories first for composer scripts
+RUN mkdir -p storage/framework/{cache,sessions,views} \
+    storage/logs bootstrap/cache \
+    && chmod -R 777 storage bootstrap/cache
+
 # Install PHP deps
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 # Install Node deps + build frontend
 RUN npm ci && npm run build && rm -rf node_modules
 
-# Setup storage
-RUN mkdir -p storage/framework/{cache,sessions,views} \
-    storage/logs bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
-
 # Setup SQLite DB
 RUN touch database/database.sqlite
+RUN chmod 777 database database/database.sqlite
 
 # Nginx config
 RUN echo 'server { \
