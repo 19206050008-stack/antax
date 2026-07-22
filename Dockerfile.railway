@@ -26,6 +26,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 # Copy source
 COPY . .
 
+# Copy .env for Railway (not in git)
+COPY .env.railway .env
+
 # Buat folder dan set permission secara eksplisit
 RUN mkdir -p bootstrap/cache storage/framework/{cache,sessions,views} storage/logs \
     && chmod -R 777 bootstrap/cache storage \
