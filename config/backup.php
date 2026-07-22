@@ -236,11 +236,11 @@ return [
         'notifiable' => Notifiable::class,
 
         'mail' => [
-            'to' => env('BACKUP_EMAIL'),
+            'to' => env('BACKUP_EMAIL', 'admin@anta.ai'),
 
             'from' => [
-                'address' => env('MAIL_FROM_ADDRESS'),
-                'name' => env('MAIL_FROM_NAME'),
+                'address' => env('MAIL_FROM_ADDRESS', 'noreply@anta.ai'),
+                'name' => env('MAIL_FROM_NAME', 'Anta AI'),
             ],
         ],
 
